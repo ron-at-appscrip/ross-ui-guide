@@ -1,0 +1,126 @@
+sequenceDiagram
+    participant User as User/Attorney
+    participant ClientService as ClientService
+    participant MatterService as MatterService
+    participant DocumentService as DocumentService
+    participant ClientDocService as ClientDocumentService
+    participant BillingService as BillingService
+    participant Supabase as Supabase Database
+    participant Storage as Supabase Storage
+
+    Note over User,Storage: 1. Client Creation and Matter Association
+    User->>ClientService: createClient(clientData)
+    ClientService->>Supabase: INSERT INTO clients
+    Supabase-->>ClientService: clientId
+    ClientService-->>User: Client created
+
+    User->>MatterService: createMatter(matterData)
+    MatterService->>Supabase: INSERT INTO matters (client_id)
+    Supabase-->>MatterService: matterId
+    MatterService->>MatterService: generateMatterNumber()
+    MatterService->>MatterService: createTaskLists()
+    MatterService->>MatterService: createDocumentFolders()
+    MatterService-->>User: Matter created with client association
+
+    Note over User,Storage: 2. Document Upload and Association
+    User->>DocumentService: uploadFile(file, path)
+    DocumentService->>Storage: Upload file to Supabase Storage
+    Storage-->>DocumentService: fileUrl
+    DocumentService->>DocumentService: createDocumentFromUpload()
+    DocumentService->>Supabase: INSERT INTO documents (client_id, matter_id)
+    Supabase-->>DocumentService: documentId
+    DocumentService-->>User: Document uploaded and associated
+
+    Note over User,Storage: 3. Document Analysis and AI Processing
+    User->>DocumentService: analyzeDocument(documentId)
+    DocumentService->>DocumentService: extractText()
+    DocumentService->>DocumentService: performAIAnalysis()
+    DocumentService->>Supabase: UPDATE documents (ai_analysis)
+    DocumentService-->>User: AI analysis complete
+
+    Note over User,Storage: 4. Client-Matter-Document Queries
+    User->>ClientService: getClient(clientId)
+    ClientService->>Supabase: SELECT * FROM clients WHERE id = clientId
+    Supabase-->>ClientService: clientData
+    ClientService-->>User: Client details
+
+    User->>MatterService: getMattersByClient(clientId)
+    MatterService->>Supabase: SELECT * FROM matters WHERE client_id = clientId
+    Supabase-->>MatterService: mattersList
+    MatterService-->>User: Client's matters
+
+    User->>ClientDocService: getClientDocuments(clientId)
+    ClientDocService->>Supabase: SELECT * FROM documents WHERE client_id = clientId
+    Supabase-->>ClientDocService: documentsList
+    ClientDocService-->>User: Client's documents
+
+    Note over User,Storage: 5. Matter-Specific Document Management
+    User->>DocumentService: getDocumentsByMatter(matterId)
+    DocumentService->>Supabase: SELECT * FROM documents WHERE matter_id = matterId
+    Supabase-->>DocumentService: matterDocuments
+    DocumentService-->>User: Matter documents
+
+    User->>DocumentService: createDocumentVersion(parentDocId)
+    DocumentService->>Storage: Upload new version
+    Storage-->>DocumentService: newFileUrl
+    DocumentService->>Supabase: INSERT INTO documents (parent_document_id)
+    Supabase-->>DocumentService: versionId
+    DocumentService-->>User: Document version created
+
+    Note over User,Storage: 6. Billing Integration
+    User->>BillingService: createTimeEntry(matterId, timeData)
+    BillingService->>MatterService: getMatter(matterId)
+    MatterService->>Supabase: SELECT * FROM matters WHERE id = matterId
+    Supabase-->>MatterService: matterData
+    MatterService-->>BillingService: matter details
+    BillingService->>BillingService: calculateAmount()
+    BillingService->>Supabase: INSERT INTO time_entries
+    BillingService-->>User: Time entry created
+
+    Note over User,Storage: 7. Document Sharing and Permissions
+    User->>DocumentService: shareDocument(documentId, userIds)
+    DocumentService->>Supabase: UPDATE documents (shared_with)
+    Supabase-->>DocumentService: success
+    DocumentService-->>User: Document shared
+
+    Note over User,Storage: 8. Matter Status Updates
+    User->>MatterService: updateMatterStatus(matterId, 'active')
+    MatterService->>Supabase: UPDATE matters SET status = 'active'
+    Supabase-->>MatterService: success
+    MatterService->>MatterService: updateLastActivity()
+    MatterService-->>User: Matter status updated
+
+    Note over User,Storage: 9. Document Search and Filtering
+    User->>DocumentService: searchDocuments(query, filters)
+    DocumentService->>Supabase: SELECT * FROM documents WHERE (search conditions)
+    Supabase-->>DocumentService: searchResults
+    DocumentService->>DocumentService: applyFilters()
+    DocumentService-->>User: Filtered documents
+
+    Note over User,Storage: 10. Client-Matter Analytics
+    User->>ClientService: getClientMatterCounts(clientId)
+    ClientService->>Supabase: SELECT COUNT(*) FROM matters WHERE client_id = clientId
+    Supabase-->>ClientService: matterCounts
+    ClientService-->>User: Client matter statistics
+
+    User->>MatterService: getMatterStats()
+    MatterService->>Supabase: SELECT status, COUNT(*) FROM matters GROUP BY status
+    Supabase-->>MatterService: matterStats
+    MatterService-->>User: Matter statistics
+
+    Note over User,Storage: 11. Document Workflow and Approval
+    User->>DocumentService: updateDocumentStatus(documentId, 'review')
+    DocumentService->>Supabase: UPDATE documents SET status = 'review'
+    Supabase-->>DocumentService: success
+    DocumentService->>DocumentService: notifyReviewers()
+    DocumentService-->>User: Document status updated
+
+    Note over User,Storage: 12. Matter Closure and Document Archiving
+    User->>MatterService: updateMatterStatus(matterId, 'closed')
+    MatterService->>Supabase: UPDATE matters SET status = 'closed', date_closed = NOW()
+    Supabase-->>MatterService: success
+    MatterService->>DocumentService: archiveMatterDocuments(matterId)
+    DocumentService->>Supabase: UPDATE documents SET status = 'archived' WHERE matter_id = matterId
+    Supabase-->>DocumentService: success
+    DocumentService-->>MatterService: documents archived
+    MatterService-->>User: Matter closed and documents archived 

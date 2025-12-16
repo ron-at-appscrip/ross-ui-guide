@@ -1,0 +1,32 @@
+
+@layer components {
+  /* Glassmorphic Components */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  .glass-card {
+    @apply glass rounded-lg;
+  }
+
+  .glass-modal {
+    @apply glass rounded-xl;
+  }
+
+  .glass-dropdown {
+    @apply glass rounded-md;
+    z-index: 50;
+  }
+
+  .glass-sidebar {
+    @apply glass;
+    border-right: 1px solid var(--glass-border);
+    border-left: none;
+    border-top: none;
+    border-bottom: none;
+    background: var(--sidebar-background);
+  }
+}

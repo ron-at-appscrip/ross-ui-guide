@@ -1,0 +1,418 @@
+
+import React, { useState, useEffect } from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Plus, Save, Trash2, Edit3, ExternalLink, Briefcase, Clock } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { TimeEntry } from '@/types/billing';
+import { BillingService } from '@/services/billingService';
+import { useToast } from '@/components/ui/use-toast';
+
+const TimeEntryGrid = () => {
+  const [entries, setEntries] = useState<TimeEntry[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editFormData, setEditFormData] = useState<{[key: string]: any}>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [matters, setMatters] = useState<Array<{
+    id: string;
+    title: string;
+    clientName: string;
+    practiceArea: string;
+    hourlyRate?: number;
+  }>>([]);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    loadTimeEntries();
+    loadMatters();
+  }, []);
+
+  const loadTimeEntries = async () => {
+    try {
+      setIsLoading(true);
+      const timeEntries = await BillingService.getTimeEntries();
+      setEntries(timeEntries);
+    } catch (error) {
+      console.error('Error loading time entries:', error);
+      toast({
+        title: "Error loading time entries",
+        description: "Unable to load time entries. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadMatters = async () => {
+    try {
+      const mattersList = await BillingService.getMattersForTimeEntry();
+      setMatters(mattersList);
+    } catch (error) {
+      console.error('Error loading matters:', error);
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    const variants = {
+      draft: 'secondary',
+      submitted: 'default',
+      billed: 'success',
+      paid: 'success'
+    } as const;
+    
+    return (
+      <Badge variant={variants[status as keyof typeof variants] || 'secondary'}>
+        {status}
+      </Badge>
+    );
+  };
+
+  const handleEdit = (id: string) => {
+    const entry = entries.find(e => e.id === id);
+    if (entry) {
+      setEditFormData({
+        matterId: entry.matterId,
+        description: entry.description,
+        hours: entry.hours,
+        rate: entry.rate,
+        amount: entry.amount
+      });
+    }
+    setEditingId(id);
+  };
+
+  const handleSave = async (id: string) => {
+    try {
+      const formData = editFormData;
+      const hours = parseFloat(formData.hours) || 0;
+      const rate = parseFloat(formData.rate) || 0;
+      const amount = hours * rate;
+      
+      // Update the entry
+      const updatedEntry = {
+        ...entries.find(e => e.id === id)!,
+        matterId: formData.matterId,
+        description: formData.description,
+        hours,
+        rate,
+        amount
+      };
+      
+      await BillingService.updateTimeEntry(id, updatedEntry);
+      setEntries(entries.map(e => e.id === id ? updatedEntry : e));
+      setEditingId(null);
+      setEditFormData({});
+      
+      toast({
+        title: "Time entry saved",
+        description: "Your changes have been saved successfully."
+      });
+    } catch (error) {
+      console.error('Error saving time entry:', error);
+      toast({
+        title: "Error saving entry",
+        description: "Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await BillingService.deleteTimeEntry(id);
+      setEntries(entries.filter(entry => entry.id !== id));
+      toast({
+        title: "Time entry deleted",
+        description: "The time entry has been removed."
+      });
+    } catch (error) {
+      console.error('Error deleting time entry:', error);
+      toast({
+        title: "Error deleting entry",
+        description: "Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const addNewEntry = async () => {
+    if (matters.length === 0) {
+      toast({
+        title: "No matters available",
+        description: "Please create a matter first before adding time entries.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const firstMatter = matters[0];
+      const rate = firstMatter.hourlyRate || 350;
+      const hours = 0;
+      const newEntry = await BillingService.createTimeEntry({
+        matterId: firstMatter.id,
+        matterTitle: firstMatter.title,
+        clientId: '',
+        clientName: firstMatter.clientName,
+        description: '',
+        hours,
+        rate,
+        amount: hours * rate,
+        date: new Date().toISOString().split('T')[0],
+        status: 'draft',
+        billable: true,
+        activityType: 'general_work',
+        tags: []
+      });
+      
+      setEntries([newEntry, ...entries]);
+      setEditingId(newEntry.id);
+      
+      // Initialize edit form data for the new entry
+      setEditFormData({
+        matterId: firstMatter.id,
+        description: '',
+        hours,
+        rate,
+        amount: hours * rate
+      });
+    } catch (error) {
+      console.error('Error creating time entry:', error);
+      toast({
+        title: "Error creating entry",
+        description: "Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>Time Entries</CardTitle>
+          <Button onClick={addNewEntry} size="sm">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Entry
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading time entries...</p>
+            </div>
+          </div>
+        ) : entries.length === 0 ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium mb-2">No time entries yet</h3>
+              <p className="text-muted-foreground mb-4">Start tracking your time by adding your first entry.</p>
+              <Button onClick={addNewEntry}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Your First Entry
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Matter</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Hours</TableHead>
+                  <TableHead>Rate</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {entries.map((entry) => (
+                <TableRow key={entry.id}>
+                  <TableCell>
+                    {editingId === entry.id ? (
+                      <Input
+                        type="date"
+                        defaultValue={entry.date}
+                        className="w-32"
+                      />
+                    ) : (
+                      new Date(entry.date).toLocaleDateString()
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {editingId === entry.id ? (
+                      <Select 
+                        value={editFormData.matterId || entry.matterId} 
+                        onValueChange={(value) => {
+                          const selectedMatter = matters.find(m => m.id === value);
+                          setEditFormData(prev => ({
+                            ...prev,
+                            matterId: value,
+                            rate: selectedMatter?.hourlyRate || 350
+                          }));
+                        }}
+                      >
+                        <SelectTrigger className="w-48">
+                          <SelectValue placeholder="Select matter..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {matters.map((matter) => (
+                            <SelectItem key={matter.id} value={matter.id}>
+                              <div className="flex flex-col max-w-[250px]">
+                                <div className="font-medium text-sm truncate" title={matter.title}>{matter.title}</div>
+                                <div className="text-xs text-muted-foreground truncate" title={`${matter.clientName} • ${matter.practiceArea}`}>
+                                  {matter.clientName} • {matter.practiceArea}
+                                </div>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <div className="text-sm max-w-[200px]">
+                        <div className="font-medium flex items-center gap-1">
+                          <Link 
+                            to={`/dashboard/matters/${entry.matterId}`}
+                            className="hover:text-primary hover:underline flex items-center gap-1 truncate"
+                            title={entry.matterTitle}
+                          >
+                            <span className="truncate">{entry.matterTitle}</span>
+                            <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                          </Link>
+                        </div>
+                        <div className="text-muted-foreground flex items-center gap-1">
+                          <Briefcase className="h-3 w-3 flex-shrink-0" />
+                          <Link 
+                            to={`/dashboard/clients/${entry.clientId}`}
+                            className="hover:text-primary hover:underline truncate"
+                            title={entry.clientName}
+                          >
+                            {entry.clientName}
+                          </Link>
+                        </div>
+                      </div>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {editingId === entry.id ? (
+                      <Input
+                        value={editFormData.description !== undefined ? editFormData.description : entry.description}
+                        onChange={(e) => setEditFormData(prev => ({ ...prev, description: e.target.value }))}
+                        className="w-60"
+                        placeholder="Description of work..."
+                      />
+                    ) : (
+                      <div className="max-w-xs">
+                        <span className="truncate block" title={entry.description}>
+                          {entry.description}
+                        </span>
+                        {entry.aiSuggested && (
+                          <Badge variant="outline" className="mt-1 text-xs">
+                            AI Suggested
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {editingId === entry.id ? (
+                      <Input
+                        type="number"
+                        step="0.1"
+                        value={editFormData.hours !== undefined ? editFormData.hours : entry.hours}
+                        onChange={(e) => {
+                          const hours = parseFloat(e.target.value) || 0;
+                          const rate = editFormData.rate !== undefined ? editFormData.rate : entry.rate;
+                          setEditFormData(prev => ({ 
+                            ...prev, 
+                            hours,
+                            amount: hours * rate
+                          }));
+                        }}
+                        className="w-20"
+                      />
+                    ) : (
+                      entry.hours
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {editingId === entry.id ? (
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={editFormData.rate !== undefined ? editFormData.rate : entry.rate}
+                        onChange={(e) => {
+                          const rate = parseFloat(e.target.value) || 0;
+                          const hours = editFormData.hours !== undefined ? editFormData.hours : entry.hours;
+                          setEditFormData(prev => ({ 
+                            ...prev, 
+                            rate,
+                            amount: hours * rate
+                          }));
+                        }}
+                        className="w-20"
+                      />
+                    ) : (
+                      `$${entry.rate}`
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {editingId === entry.id ? (
+                      `$${(editFormData.amount !== undefined ? editFormData.amount : entry.amount).toFixed(2)}`
+                    ) : (
+                      `$${entry.amount}`
+                    )}
+                  </TableCell>
+                  <TableCell>{getStatusBadge(entry.status)}</TableCell>
+                  <TableCell>
+                    <div className="flex space-x-1">
+                      {editingId === entry.id ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleSave(entry.id)}
+                        >
+                          <Save className="h-3 w-3" />
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEdit(entry.id)}
+                        >
+                          <Edit3 className="h-3 w-3" />
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleDelete(entry.id)}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+export default TimeEntryGrid;

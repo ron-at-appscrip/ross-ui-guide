@@ -1,0 +1,122 @@
+
+@layer base {
+  /* Typography System */
+  h1 {
+    font-family: var(--font-primary);
+    font-weight: 700;
+    font-size: 2.25rem; /* 36px */
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+
+  h2 {
+    font-family: var(--font-primary);
+    font-weight: 600;
+    font-size: 1.875rem; /* 30px */
+    line-height: 1.3;
+    letter-spacing: -0.025em;
+  }
+
+  h3 {
+    font-family: var(--font-primary);
+    font-weight: 600;
+    font-size: 1.5rem; /* 24px */
+    line-height: 1.3;
+  }
+
+  h4 {
+    font-family: var(--font-primary);
+    font-weight: 600;
+    font-size: 1.25rem; /* 20px */
+    line-height: 1.3;
+  }
+
+  p {
+    font-family: var(--font-primary);
+    font-weight: 400;
+    font-size: 1rem; /* 16px */
+    line-height: 1.5;
+  }
+
+  /* Legal citation text */
+  .legal-text {
+    font-family: var(--font-serif);
+    font-style: italic;
+    color: #555;
+  }
+}
+
+@layer components {
+  /* Typography Utilities */
+  .text-heading-1 {
+    font-family: var(--font-primary);
+    font-weight: 700;
+    font-size: 2.25rem;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+
+  .text-heading-2 {
+    font-family: var(--font-primary);
+    font-weight: 600;
+    font-size: 1.875rem;
+    line-height: 1.3;
+    letter-spacing: -0.025em;
+  }
+
+  .text-heading-3 {
+    font-family: var(--font-primary);
+    font-weight: 600;
+    font-size: 1.5rem;
+    line-height: 1.3;
+  }
+
+  .text-heading-4 {
+    font-family: var(--font-primary);
+    font-weight: 600;
+    font-size: 1.25rem;
+    line-height: 1.3;
+  }
+
+  .text-body {
+    font-family: var(--font-primary);
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .text-button {
+    font-family: var(--font-primary);
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .text-table-header {
+    font-family: var(--font-primary);
+    font-weight: 500;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .text-table-cell {
+    font-family: var(--font-primary);
+    font-weight: 400;
+    font-size: 0.875rem;
+    line-height: 1.4;
+  }
+
+  .text-form-label {
+    font-family: var(--font-primary);
+    font-weight: 500;
+    font-size: 0.875rem;
+  }
+
+  .text-legal {
+    font-family: var(--font-serif);
+    font-style: italic;
+    color: #555;
+  }
+}
