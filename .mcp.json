@@ -9,9 +9,9 @@
         "aiveyvvhlfiqhbaqazrr"
       ],
       "env": {
-        "SUPABASE_URL": "https://aiveyvvhlfiqhbaqazrr.supabase.co",
-        "SUPABASE_ACCESS_TOKEN": "sbp_fa4775b4a7c34fc924f2763a150d98c509e0aa04",
-        "SUPABASE_SERVICE_ROLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpdmV5dnZobGZpcWhiYXFhenJyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQzMDI1NywiZXhwIjoyMDY2MDA2MjU3fQ.jvOd1NHIORUcwyChZ_UuMHGJyc-yVJM_-CwyAnYZFdE"
+        "SUPABASE_URL": "https://www.google.com",
+        "SUPABASE_ACCESS_TOKEN": "aa",
+        "SUPABASE_SERVICE_ROLE_KEY": ".."
       }
     }
   }

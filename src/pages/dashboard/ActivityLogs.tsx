@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/contexts/WorkingAuthContext';
+import { useAuth } from '@/contexts/SimpleAuthContext';
 import { activityService } from '@/services/activityService';
 import { ActivityLogWithChanges, ActivityLogFilter, ActivityType, EntityType } from '@/types/activity';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';

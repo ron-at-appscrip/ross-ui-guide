@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { useAuth } from '@/contexts/WorkingAuthContext';
+import { useAuth } from '@/contexts/SimpleAuthContext';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import ProfileAccountInfo from '@/components/profile/ProfileAccountInfo';
 import ProfilePersonalInfo from '@/components/profile/ProfilePersonalInfo';

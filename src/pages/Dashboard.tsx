@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useAuth } from '@/contexts/WorkingAuthContext';
+import { useAuth } from '@/contexts/SimpleAuthContext';
 import TodaysPriorities from '@/components/dashboard/widgets/TodaysPriorities';
 import ActiveMatters from '@/components/dashboard/widgets/ActiveMatters';
 import RevenueInsights from '@/components/dashboard/widgets/RevenueInsights';

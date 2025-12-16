@@ -7,7 +7,6 @@ import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/SimpleAuthContext';
 import { useSignupFlow } from '@/contexts/SignupFlowContext';
@@ -37,8 +36,8 @@ type SignupFormData = z.infer<typeof signupSchema>;
 interface SignupFormProps {
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
-  socialLoading: boolean;
-  setSocialLoading: (loading: boolean) => void;
+  socialLoading?: boolean;
+  setSocialLoading?: (loading: boolean) => void;
 }
 
 const SignupForm: React.FC<SignupFormProps> = ({
@@ -119,23 +118,6 @@ const SignupForm: React.FC<SignupFormProps> = ({
 
   return (
     <div className="space-y-6">
-      <SocialLoginButtons 
-        isLoading={anyLoading} 
-        onLoadingChange={setSocialLoading}
-        mode="signup"
-      />
-
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <Separator />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">
-            Or continue with email
-          </span>
-        </div>
-      </div>
-
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
@@ -146,7 +128,7 @@ const SignupForm: React.FC<SignupFormProps> = ({
               placeholder="Enter your first name"
               {...register('firstName')}
               className={errors.firstName ? 'border-destructive' : ''}
-              disabled={anyLoading}
+              disabled={isLoading}
             />
             {errors.firstName && (
               <p className="text-sm text-destructive">{errors.firstName.message}</p>
@@ -160,7 +142,7 @@ const SignupForm: React.FC<SignupFormProps> = ({
               placeholder="Enter your last name"
               {...register('lastName')}
               className={errors.lastName ? 'border-destructive' : ''}
-              disabled={anyLoading}
+              disabled={isLoading}
             />
             {errors.lastName && (
               <p className="text-sm text-destructive">{errors.lastName.message}</p>
@@ -176,7 +158,7 @@ const SignupForm: React.FC<SignupFormProps> = ({
             placeholder="Enter your email"
             {...register('email')}
             className={errors.email ? 'border-destructive' : ''}
-            disabled={anyLoading}
+            disabled={isLoading}
           />
           {errors.email && (
             <p className="text-sm text-destructive">{errors.email.message}</p>
@@ -192,13 +174,13 @@ const SignupForm: React.FC<SignupFormProps> = ({
               placeholder="Create a password"
               {...register('password')}
               className={errors.password ? 'border-destructive pr-12' : 'pr-12'}
-              disabled={anyLoading}
+              disabled={isLoading}
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-1 top-1/2 transform -translate-y-1/2 p-2 text-muted-foreground hover:text-foreground disabled:opacity-50 rounded-md hover:bg-muted/50 transition-colors"
-              disabled={anyLoading}
+              disabled={isLoading}
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -219,13 +201,13 @@ const SignupForm: React.FC<SignupFormProps> = ({
               placeholder="Confirm your password"
               {...register('confirmPassword')}
               className={errors.confirmPassword ? 'border-destructive pr-12' : 'pr-12'}
-              disabled={anyLoading}
+              disabled={isLoading}
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               className="absolute right-1 top-1/2 transform -translate-y-1/2 p-2 text-muted-foreground hover:text-foreground disabled:opacity-50 rounded-md hover:bg-muted/50 transition-colors"
-              disabled={anyLoading}
+              disabled={isLoading}
               aria-label={showConfirmPassword ? "Hide password" : "Show password"}
             >
               {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -242,7 +224,7 @@ const SignupForm: React.FC<SignupFormProps> = ({
             id="agreeToTerms"
             {...register('agreeToTerms')}
             className="rounded border-gray-300 mt-0.5 h-4 w-4 flex-shrink-0"
-            disabled={anyLoading}
+            disabled={isLoading}
           />
           <div className="space-y-1">
             <Label htmlFor="agreeToTerms" className="text-sm leading-tight cursor-pointer">
@@ -264,7 +246,7 @@ const SignupForm: React.FC<SignupFormProps> = ({
         <Button
           type="submit"
           className="w-full"
-          disabled={anyLoading}
+          disabled={isLoading}
         >
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {isLoading ? 'Creating account...' : 'Create account'}
