@@ -2,7 +2,7 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/WorkingAuthContext";
+import { useAuth } from "@/contexts/SimpleAuthContext";
 import { toast } from "sonner";
 import {
   SidebarMenu,

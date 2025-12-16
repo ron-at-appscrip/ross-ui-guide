@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { SignupWizardData } from '@/types/wizard';
 import { useSignupFlow } from '@/contexts/SignupFlowContext';
-import { useAuth } from '@/contexts/WorkingAuthContext';
+import { useAuth } from '@/contexts/SimpleAuthContext';
 import { supabaseWizardService } from '@/services/supabaseWizardService';
 
 const STORAGE_KEY = 'signup-wizard-data';

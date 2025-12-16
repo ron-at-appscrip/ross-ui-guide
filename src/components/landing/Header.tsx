@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BrainCircuit, User } from "lucide-react";
-import { useAuth } from "@/contexts/WorkingAuthContext";
+import { useAuth } from "@/contexts/SimpleAuthContext";
 
 const Header = () => {
   const { user, logout } = useAuth();
