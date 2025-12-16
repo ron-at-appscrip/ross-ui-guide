@@ -3,19 +3,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SimpleAuthProvider } from "@/contexts/SimpleAuthContext";
 import { SignupFlowProvider } from "@/contexts/SignupFlowContext";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { initPerformanceMonitoring } from "@/utils/bundleAnalysis";
-import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import SignupWizardPage from "./pages/SignupWizard";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import Clients from "./pages/dashboard/Clients";
@@ -72,7 +65,7 @@ const App = () => (
         <SimpleAuthProvider>
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/uspto-services" element={<USPTOServices />} />
               <Route path="/euipo-services" element={<EUIPOServices />} />
               <Route path="/euipo/trademark/:applicationNumber" element={<EUIPOTrademarkDetail />} />
@@ -83,21 +76,12 @@ const App = () => (
               <Route path="/trademark/:serialNumber/renewal" element={<TrademarkRenewal />} />
               <Route path="/trademark/renewal/success" element={<TrademarkRenewalSuccess />} />
               <Route path="/trademark/renewal/cancel" element={<TrademarkRenewalCancel />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
               <Route path="/test-simple" element={<TestSimple />} />
               <Route path="/uspto-direct" element={<USPTODirect />} />
-              <Route path="/signup-wizard" element={<SignupWizardPage />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/auth/xero/callback" element={<XeroCallback />} />
               <Route 
                 path="/dashboard" 
-                element={
-                  <ProtectedRoute>
-                    <DashboardLayout />
-                  </ProtectedRoute>
-                } 
+                element={<DashboardLayout />} 
               >
                 <Route index element={<Dashboard />} />
                 <Route path="clients" element={<Clients />} />

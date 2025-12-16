@@ -32,21 +32,32 @@ export const useAuth = () => {
 
 const STORAGE_KEY = 'simple-auth-user';
 
-export const SimpleAuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+// Default user - no authentication needed
+const defaultUser: User = {
+  id: 'default-user',
+  email: 'user@example.com',
+  name: 'User',
+  hasCompletedWizard: true,
+};
 
-  // Load user from localStorage on mount
+export const SimpleAuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(defaultUser);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Load user from localStorage on mount, or use default
   useEffect(() => {
     try {
       const storedUser = localStorage.getItem(STORAGE_KEY);
       if (storedUser) {
         setUser(JSON.parse(storedUser));
+      } else {
+        // Set default user if none exists
+        setUser(defaultUser);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultUser));
       }
     } catch (error) {
       console.error('Failed to load user from storage:', error);
-    } finally {
-      setIsLoading(false);
+      setUser(defaultUser);
     }
   }, []);
 
